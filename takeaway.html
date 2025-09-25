@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Takeaways: Remote Work Productivity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .document-container {
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 1in;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            min-height: 11in;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+        }
+
+        h1 {
+            color: #1f2937;
+        }
+
+        .chart-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body {
+                background: none;
+            }
+            .document-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0.5in;
+            }
+            .chart-container {
+                border: 1px solid #000;
+                page-break-inside: avoid;
+            }
+            svg text {
+                fill: #000 !important;
+            }
+            h1, h2, h3, p {
+                color: #000 !important;
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="document-container">
+        <header class="text-center mb-12">
+            <h1 class="text-3xl font-bold mb-2">Key Takeaways: The Remote Work Productivity Paradox</h1>
+            <p class="text-gray-600">A data-driven summary of research findings on web-development productivity.</p>
+        </header>
+
+        <section class="mb-12">
+            <p class="text-gray-700 leading-relaxed text-justify">
+                The shift to remote work has created a "productivity paradox" in web development. Developers report feeling more productive and satisfied, while many managers express a lack of confidence in their teams' output. This report synthesizes key data to show that the issue is not a simple binary but is contingent on a strategic re-engineering of culture, communication, and technology. The solution lies in a fundamental shift from activity-based management to an outcomes-oriented framework, leveraging asynchronous communication and fostering trust to unlock the full potential of a distributed workforce.
+            </p>
+        </section>
+
+        <!-- Infographic 1: Bar Chart -->
+        <section class="mb-12">
+            <h2 class="text-xl font-bold text-center mb-4">The Global Shift to Flexible Work</h2>
+            <div class="chart-container flex justify-center items-center">
+                <svg id="bar-chart" width="100%" height="250" viewBox="0 0 500 250"></svg>
+            </div>
+            <p class="text-sm text-gray-500 text-center mt-4">Data from Stack Overflow 2024 and 2025 Developer Surveys.</p>
+        </section>
+
+        <!-- Infographic 2: Donut Chart -->
+        <section class="mb-12">
+            <h2 class="text-xl font-bold text-center mb-4">Overwhelming AI Tool Adoption</h2>
+            <div class="chart-container flex justify-center items-center">
+                <svg id="donut-chart" width="100%" height="250" viewBox="0 0 500 250"></svg>
+            </div>
+            <p class="text-sm text-gray-500 text-center mt-4">84% of developers are already using or plan to use AI tools.</p>
+        </section>
+
+        <!-- Infographic 3: Simple Metric Callout -->
+        <section class="mb-12">
+            <h2 class="text-xl font-bold text-center mb-4">Productivity Multiplier: Efficiency Gains</h2>
+            <div class="chart-container flex justify-center items-center">
+                <svg id="metric-chart" width="100%" height="150" viewBox="0 0 500 150"></svg>
+            </div>
+            <p class="text-sm text-gray-500 text-center mt-4">A direct result of generative AI and code completion tools.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Data for Infographic 1: Bar Chart
+        const barData = [
+            { arrangement: "Remote", value2025: 32.4, value2024: 38 },
+            { arrangement: "Hybrid", value2025: 17.2, value2024: 42 },
+            { arrangement: "In-person", value2025: 17.9, value2024: 20 }
+        ];
+
+        // Bar Chart
+        function createBarChart() {
+            const svg = d3.select("#bar-chart");
+            const margin = { top: 20, right: 30, bottom: 60, left: 40 };
+            const width = 500 - margin.left - margin.right;
+            const height = 250 - margin.top - margin.bottom;
+
+            const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x0 = d3.scaleBand()
+                .domain(barData.map(d => d.arrangement))
+                .rangeRound([0, width])
+                .paddingInner(0.1);
+
+            const x1 = d3.scaleBand()
+                .domain(["2025", "2024"])
+                .rangeRound([0, x0.bandwidth()])
+                .padding(0.05);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(barData, d => Math.max(d.value2025, d.value2024))]).nice()
+                .rangeRound([height, 0]);
+
+            const colors = { "2025": "#4b5563", "2024": "#9ca3af" };
+
+            g.append("g")
+                .selectAll("g")
+                .data(barData)
+                .enter().append("g")
+                .attr("transform", d => `translate(${x0(d.arrangement)},0)`)
+                .selectAll("rect")
+                .data(d => [{ key: "2025", value: d.value2025 }, { key: "2024", value: d.value2024 }])
+                .enter().append("rect")
+                .attr("x", d => x1(d.key))
+                .attr("y", d => y(d.value))
+                .attr("width", x1.bandwidth())
+                .attr("height", d => height - y(d.value))
+                .attr("fill", d => colors[d.key]);
+
+            // X-axis
+            g.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x0).tickSize(0).tickPadding(10))
+                .select(".domain").remove();
+
+            // Y-axis
+            g.append("g")
+                .call(d3.axisLeft(y).ticks(5).tickSizeOuter(0))
+                .select(".domain").remove();
+
+            // X-axis labels
+            g.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .selectAll("text")
+                .attr("y", 20)
+                .attr("fill", "#4b5563")
+                .style("font-size", "12px")
+                .style("text-transform", "uppercase");
+
+            // Legends
+            const legend = g.append("g")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", 10)
+                .attr("text-anchor", "end")
+                .selectAll("g")
+                .data(Object.keys(colors).slice().reverse())
+                .enter().append("g")
+                .attr("transform", (d, i) => `translate(0,${i * 20})`);
+
+            legend.append("rect")
+                .attr("x", width - 19)
+                .attr("width", 19)
+                .attr("height", 19)
+                .attr("fill", d => colors[d]);
+
+            legend.append("text")
+                .attr("x", width - 24)
+                .attr("y", 9.5)
+                .attr("dy", "0.32em")
+                .text(d => d)
+                .attr("fill", "#1f2937");
+        }
+
+        // Data for Infographic 2: Donut Chart
+        const donutData = [{ label: "Using or Planning to Use AI", value: 84 }, { label: "Not Using", value: 16 }];
+
+        // Donut Chart
+        function createDonutChart() {
+            const svg = d3.select("#donut-chart");
+            const width = 500, height = 250, radius = Math.min(width, height) / 2 - 20;
+
+            const g = svg.append("g")
+                .attr("transform", `translate(${width / 2},${height / 2})`);
+
+            const color = d3.scaleOrdinal()
+                .domain(donutData.map(d => d.label))
+                .range(["#1f2937", "#9ca3af"]);
+
+            const pie = d3.pie().value(d => d.value);
+
+            const arc = d3.arc()
+                .innerRadius(radius - 50)
+                .outerRadius(radius);
+
+            const arcs = g.selectAll(".arc")
+                .data(pie(donutData))
+                .enter().append("g")
+                .attr("class", "arc");
+
+            arcs.append("path")
+                .attr("d", arc)
+                .attr("fill", d => color(d.data.label));
+
+            arcs.append("text")
+                .attr("transform", d => `translate(${arc.centroid(d)})`)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#ffffff")
+                .text(d => `${d.data.value}%`)
+                .style("font-size", "14px")
+                .style("font-weight", "bold");
+        }
+
+        // Data for Infographic 3: Metric Callout
+        const metricData = 41;
+
+        // Metric Callout
+        function createMetricChart() {
+            const svg = d3.select("#metric-chart");
+            const width = 500, height = 150;
+
+            // Background bar
+            svg.append("rect")
+                .attr("x", 50)
+                .attr("y", 60)
+                .attr("width", width - 100)
+                .attr("height", 30)
+                .attr("fill", "#e5e7eb")
+                .attr("rx", 5)
+                .attr("ry", 5);
+
+            // Foreground bar
+            svg.append("rect")
+                .attr("x", 50)
+                .attr("y", 60)
+                .attr("width", (width - 100) * (metricData / 100))
+                .attr("height", 30)
+                .attr("fill", "#1f2937")
+                .attr("rx", 5)
+                .attr("ry", 5);
+
+            // Percentage text
+            svg.append("text")
+                .attr("x", 50 + (width - 100) * (metricData / 100) + 10)
+                .attr("y", 75)
+                .attr("dy", "0.35em")
+                .attr("fill", "#1f2937")
+                .style("font-size", "2rem")
+                .style("font-weight", "bold")
+                .text(`+${metricData}%`);
+
+            // Description text
+            svg.append("text")
+                .attr("x", 50)
+                .attr("y", 50)
+                .attr("dy", "0.35em")
+                .attr("fill", "#6b7280")
+                .style("font-size", "14px")
+                .text("Increase in characters inserted per keystroke (2020-2023)");
+        }
+        
+        // Render charts on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            createBarChart();
+            createDonutChart();
+            createMetricChart();
+        });
+    </script>
+</body>
+</html>
